@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ConfessFi — Anonymous Web3 Confessions on Arc</title>
+<style>
+  :root{
+    --bg:#0B0B0F; --card:#121218; --card2:#161021;
+    --purple:#A855F7; --purpleDim:#7c3aed; --green:#34d399; --red:#f87171;
+    --line:rgba(168,85,247,0.25); --muted:#8a8a99; --text:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--purple)}
+  header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 22px;border-bottom:1px solid var(--line);background:rgba(11,11,15,.92);backdrop-filter:blur(8px)}
+  .logo{font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--purple)}
+  .logo span{color:var(--green)}
+  .tag{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#c4b5fd;
+    border:1px solid var(--line);border-radius:999px;padding:2px 8px;margin-left:8px}
+  w3m-button{--w3m-accent:#7c3aed;--w3m-border-radius-master:8px}
+  .btn{border:0;border-radius:9px;padding:9px 16px;font-size:14px;font-weight:600;cursor:pointer;color:#fff}
+  .btn-green{background:#059669} .btn-green:hover{background:var(--green);color:#04231a}
+  .btn-purple{background:var(--purpleDim)} .btn-purple:hover{background:var(--purple)}
+  .btn:disabled{background:#33333b;color:#777;cursor:not-allowed}
+  .balchip{display:none;font-size:12px;text-align:right;margin-right:12px}
+  .balchip .v{color:var(--green)} .balchip .l{color:var(--muted)}
+  .ticker{overflow:hidden;border-bottom:1px solid var(--line);background:#0d0d12}
+  .ticker-track{display:inline-block;white-space:nowrap;padding:9px 0;will-change:transform;animation:tick 45s linear infinite}
+  .ticker:hover .ticker-track{animation-play-state:paused}
+  .ticker-item{display:inline-flex;align-items:center;gap:8px;margin:0 26px;font-size:13px;color:#d6cdfa;cursor:pointer}
+  .ticker-item:hover{color:#fff}
+  .card.flash{box-shadow:0 0 0 2px var(--purple),0 0 26px -6px var(--purple);transition:box-shadow .3s}
+  .adminbtn{border:1px solid rgba(248,113,113,.5);background:transparent;color:#fca5a5;border-radius:7px;padding:5px 12px;font-size:11px;cursor:pointer}
+  .adminbtn:hover{background:rgba(248,113,113,.1)}
+  .ticker-item b{color:var(--green);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:1px}
+  .ticker-item .ta{font-family:ui-monospace,Menlo,monospace;color:var(--muted);font-size:11px}
+  @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .wrap{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:280px 1fr 320px;gap:22px;padding:22px}
+  @media(max-width:1000px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .panel h2{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin:0 0 12px}
+  .pool{font-size:30px;font-weight:800;color:var(--green);margin:6px 0}
+  .pool small{font-size:13px;color:var(--muted);font-weight:500;margin-left:4px}
+  .count{font-family:ui-monospace,Menlo,monospace;color:#c4b5fd;font-size:14px}
+  .warn{border:1px solid rgba(248,113,113,.4);background:rgba(127,29,29,.3);border-radius:14px;padding:14px;color:#fca5a5;font-size:13px;margin-top:16px}
+  .cat{display:flex;flex-direction:column;gap:8px}
+  .cat button{text-align:left;border:0;background:transparent;color:#9ca3af;border-radius:9px;padding:9px 12px;font-size:14px;cursor:pointer}
+  .cat button:hover{background:rgba(255,255,255,.05)}
+  .cat button.active{background:rgba(124,58,237,.18);color:#c4b5fd;box-shadow:inset 0 0 0 1px rgba(124,58,237,.5)}
+  .share{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid rgba(124,58,237,.4);
+    border-radius:14px;padding:18px;box-shadow:0 0 30px -12px rgba(168,85,247,.5)}
+  .share h2{font-size:18px;color:#c4b5fd;margin:0}
+  .share p.sub{font-size:12px;color:var(--muted);margin:4px 0 0}
+  textarea{width:100%;height:96px;resize:none;border:1px solid var(--line);background:var(--bg);color:var(--text);
+    border-radius:9px;padding:12px;font-size:14px;margin-top:12px;outline:none}
+  textarea:focus{border-color:var(--purple)}
+  select{border:1px solid var(--line);background:var(--bg);color:#d1d5db;border-radius:9px;padding:9px 12px;font-size:14px;outline:none}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+  .card .top{display:flex;align-items:center;justify-content:space-between}
+  .mono{font-family:ui-monospace,Menlo,monospace;color:#c4b5fd;font-size:14px}
+  .pill{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#c4b5fd;border:1px solid var(--line);border-radius:999px;padding:2px 8px;margin-left:8px}
+  .time{font-size:12px;color:var(--muted)}
+  .body{margin:12px 0;font-size:14px;line-height:1.55;white-space:pre-wrap}
+  .barwrap{margin-top:8px}
+  .barlabels{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+  .bar{height:8px;border-radius:999px;background:rgba(127,29,29,.4);overflow:hidden;display:flex}
+  .bar>div{height:100%;background:var(--green);transition:width .3s}
+  .factbtns{display:flex;gap:8px;margin-top:8px}
+  .factbtns button{flex:1;border-radius:7px;padding:5px;font-size:11px;cursor:pointer;background:transparent}
+  .vreal{border:1px solid rgba(5,150,105,.4);color:#6ee7b7}
+  .vfake{border:1px solid rgba(248,113,113,.4);color:#fca5a5}
+  .actions{display:flex;align-items:center;gap:16px;border-top:1px solid rgba(124,58,237,.2);padding-top:12px;margin-top:14px;font-size:14px}
+  .actions button{background:transparent;border:0;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:14px}
+  .up{color:var(--green)} .down{color:var(--red)} .cm{color:#c4b5fd}
+  .score{margin-left:auto;background:rgba(124,58,237,.12);color:#c4b5fd;border-radius:7px;padding:4px 9px;font-size:12px;font-weight:700}
+  .lead li{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.05);border-radius:9px;padding:10px;margin-bottom:10px;list-style:none}
+  .lead ol{margin:0;padding:0}
+  .rank{font-size:18px;font-weight:800}
+  .deb li{background:rgba(127,29,29,.25);border-radius:9px;padding:8px;margin-bottom:8px;font-size:12px;color:#fca5a5;list-style:none}
+  .deb ul{margin:0;padding:0}
+  .cmbox{margin-top:14px;border-top:1px solid rgba(124,58,237,.2);padding-top:12px}
+  .cmbox input{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:9px;padding:9px 12px;font-size:14px;outline:none}
+  .cmitem{background:rgba(255,255,255,.05);border-radius:9px;padding:8px;margin-top:8px;font-size:12px}
+  .empty{border:1px dashed var(--line);border-radius:14px;padding:38px;text-align:center;color:var(--muted);font-size:14px}
+  .feedhead{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px}
+  .feedhead h3{margin:0;font-size:15px;color:#c4b5fd;font-weight:700}
+  .sortbtns{display:flex;gap:6px}
+  .sortbtns button{border:1px solid var(--line);background:transparent;color:#9ca3af;border-radius:7px;padding:5px 12px;font-size:12px;cursor:pointer}
+  .sortbtns button.active{background:rgba(124,58,237,.18);color:#c4b5fd;border-color:rgba(124,58,237,.5)}
+  #feed{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  #feed .card{margin-bottom:0}
+  #feed .empty{grid-column:1 / -1}
+  @media(max-width:1280px){#feed{grid-template-columns:1fr}}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f1430;border:1px solid var(--line);
+    color:#e9d5ff;padding:12px 18px;border-radius:10px;font-size:14px;z-index:50;display:none;max-width:90%}
+  .truncate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+</style>
+</head>
+<body>
+<header>
+  <div><span class="logo">Confess<span>Fi</span></span><span class="tag">Arc Testnet</span><span id="adminBadge" class="tag" style="display:none;border-color:#f87171;color:#fca5a5">ADMIN</span></div>
+  <div style="display:flex;align-items:center">
+    <div class="balchip" id="balChip"><div class="v" id="usdcBal">0.00 USDC</div><div class="l">USDC Balance</div></div>
+    <w3m-button balance="hide" size="sm"></w3m-button>
+  </div>
+</header>
+
+<div class="ticker" id="ticker" style="display:none"><div class="ticker-track" id="tickerTrack"></div></div>
+
+<div class="wrap">
+  <aside>
+    <div class="panel">
+      <h2>Weekly Prize Pool</h2>
+      <div class="pool"><span id="poolVal">0.00</span><small>USDC</small></div>
+      <h2 style="margin-top:16px">Settlement Countdown</h2>
+      <div class="count" id="countdown">—</div>
+    </div>
+    <div id="gasWarn" class="warn" style="display:none">
+      <b>Insufficient USDC balance</b>
+      <div style="margin-top:6px;font-size:12px">You need USDC on Arc Testnet to post and pay gas.
+      <a href="https://faucet.circle.com" target="_blank">Open Faucet</a></div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h2>Categories</h2>
+      <div class="cat" id="catList"></div>
+    </div>
+  </aside>
+
+  <section>
+    <div class="share">
+      <h2>Share a Secret</h2>
+      <p class="sub" id="shareSub">Connect your wallet to post — 0.2 USDC</p>
+      <textarea id="confText" maxlength="1000" placeholder="Type your anonymous confession..."></textarea>
+      <div class="row">
+        <select id="confCat"></select>
+        <button id="confessBtn" class="btn btn-green" disabled>Confess (0.2 USDC)</button>
+      </div>
+    </div>
+    <div class="feedhead" style="margin-top:22px">
+      <h3>Confession Feed</h3>
+      <div class="sortbtns" id="sortBtns">
+        <button data-sort="new" class="active">Newest</button>
+        <button data-sort="top">Top</button>
+      </div>
+    </div>
+    <div id="feed"><div class="empty">Connect your wallet to load confessions.</div></div>
+  </section>
+
+  <aside>
+    <div class="panel lead">
+      <h2>Live Leaderboard — Top 3</h2>
+      <ol id="leaderboard"><li style="background:none;color:var(--muted);font-size:12px">No ranked confessions yet.</li></ol>
+    </div>
+    <div class="panel deb" style="margin-top:16px;border-color:rgba(248,113,113,.2)">
+      <h2 style="color:rgba(248,113,113,.7)">Debunked</h2>
+      <ul id="debunked"><li style="background:none;color:var(--muted)">Nothing debunked yet.</li></ul>
+    </div>
+    <a id="contractLink" class="panel" style="display:block;margin-top:16px;text-align:center;font-size:12px;text-decoration:none" target="_blank">View Contract on Explorer</a>
+  </aside>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { createWeb3Modal, defaultConfig } from 'https://esm.sh/@web3modal/ethers@4.2.3';
+import { BrowserProvider, Contract, formatUnits, parseEther } from 'https://esm.sh/ethers@6.7.1';
+
+/* ── CONFIG ── */
+const PROJECT_ID = '65f38a70090f3dfcc7d06364559626b3'; // WalletConnect projectId (replaceable)
+/* IMPORTANT: paste the NEW contract address you get after redeploying the native-fee contract. */
+const CONFESSFI = '0x1d891C7ce9428171016Ed8a203E82E7BECEA53e6';
+const EXPLORER = 'https://testnet.arcscan.app';
+const CATEGORIES = ['Crypto','Relationships','Work','Funny','Economy'];
+/* Fees are now NATIVE USDC (18 decimals) sent as msg.value — no approve, no ERC-20. */
+const FEES = { create: parseEther('0.2'), vote: parseEther('0.1'), comment: parseEther('0.05'), fact: parseEther('0.1') };
+
+const arcTestnet = {
+  chainId: 5042002,
+  name: 'Arc Testnet',
+  currency: 'USDC',
+  explorerUrl: EXPLORER,
+  rpcUrl: 'https://rpc.testnet.arc.network',
+};
+const metadata = {
+  name: 'ConfessFi',
+  description: 'Anonymous Web3 confessions on Arc',
+  url: 'https://confessfi.app',
+  icons: ['https://confessfi.app/icon.png'],
+};
+const modal = createWeb3Modal({
+  ethersConfig: defaultConfig({ metadata }),
+  chains: [arcTestnet],
+  projectId: PROJECT_ID,
+  themeMode: 'dark',
+  themeVariables: { '--w3m-accent': '#7c3aed', '--w3m-border-radius-master': '8px' },
+});
+
+const CONFESSFI_ABI = [
+  'function createConfession(string text, uint8 category) payable returns (uint256)',
+  'function upvote(uint256 id) payable',
+  'function downvote(uint256 id) payable',
+  'function factCheck(uint256 id, bool isReal) payable',
+  'function comment(uint256 id, string text) payable',
+  'function owner() view returns (address)',
+  'function toggleConfessionVisibility(uint256 id)',
+  'function confessionCount() view returns (uint256)',
+  'function prizePool() view returns (uint256)',
+  'function timeUntilSettlement() view returns (uint256)',
+  'function getComments(uint256 id) view returns (tuple(uint256 confessionId, address author, string text, uint64 createdAt)[])',
+  'function getConfessionsPaginated(uint256 offset, uint256 limit) view returns (tuple(uint256 id, address creator, string text, uint8 category, uint64 createdAt, uint64 commentCount, uint64 upvotes, uint64 downvotes, uint64 realVotes, uint64 fakeVotes, bool hidden)[])'
+];
+
+/* ── STATE ── */
+let provider, signer, account=null, confessFiRead, confessFiWrite, isAdmin=false;
+let confessions=[], activeFilter='All', sortMode='new', openComments={}, busy=false, countdownSeconds=0;
+
+/* ── HELPERS ── */
+const $ = s => document.querySelector(s);
+const mask = a => a ? a.slice(0,4)+'...'+a.slice(-4) : '0x0000...0000';
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',5000); }
+function score(c){ return Number(c.upvotes)-Number(c.downvotes)-Number(c.fakeVotes); }
+function fmtTime(ts){ return new Date(Number(ts)*1000).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function fmtCountdown(s){ if(s<=0) return 'Settlement ready'; const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),x=Math.floor(s%60); return `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(x).padStart(2,'0')}s`; }
+function escapeHtml(s){ return (s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+/* ── INIT UI ── */
+$('#contractLink').href = EXPLORER+'/address/'+CONFESSFI;
+const catList=$('#catList'); ['All',...CATEGORIES].forEach(c=>{
+  const b=document.createElement('button'); b.textContent=c; if(c==='All')b.classList.add('active');
+  b.onclick=()=>{activeFilter=c; [...catList.children].forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderFeed();};
+  catList.appendChild(b);
+});
+const confCat=$('#confCat'); CATEGORIES.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c;confCat.appendChild(o);});
+const sortBtns=$('#sortBtns');
+sortBtns.querySelectorAll('button').forEach(b=>{
+  b.onclick=()=>{ sortMode=b.dataset.sort; [...sortBtns.children].forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderFeed(); };
+});
+/* Click a ticker item -> jump to that confession in the feed and flash it. */
+$('#tickerTrack').addEventListener('click', e=>{
+  const it=e.target.closest('.ticker-item');
+  if(it && it.dataset.id) goToConfession(it.dataset.id);
+});
+function goToConfession(id){
+  const c = confessions.find(x=>x.id.toString()===id);
+  if(!c) return;
+  if(activeFilter!=='All'){ activeFilter='All'; [...catList.children].forEach(x=>x.classList.remove('active')); catList.children[0].classList.add('active'); renderFeed(); }
+  const el = document.getElementById('conf-'+id);
+  if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),1600); }
+}
+setInterval(()=>{ if(countdownSeconds>0)countdownSeconds--; $('#countdown').textContent=fmtCountdown(countdownSeconds); },1000);
+/* Auto-refresh on-chain data every 20s so the feed stays live (others' posts appear).
+   Skips while the user is typing so it won't wipe a draft. */
+setInterval(()=>{
+  if(!account || busy) return;
+  const tag = document.activeElement && document.activeElement.tagName;
+  if(tag==='INPUT' || tag==='TEXTAREA') return;
+  refresh();
+}, 20000);
+
+/* ── WALLET (same pattern as arcvote) ── */
+modal.subscribeProvider(async ({ provider: p, address, isConnected }) => {
+  if (isConnected && p && address){
+    provider = new BrowserProvider(p);
+    signer = await provider.getSigner();
+    account = address;
+    confessFiRead = new Contract(CONFESSFI, CONFESSFI_ABI, provider);
+    confessFiWrite = new Contract(CONFESSFI, CONFESSFI_ABI, signer);
+    $('#balChip').style.display='block';
+    $('#confessBtn').disabled=false;
+    $('#shareSub').textContent='Posted anonymously as '+mask(account)+' — 0.2 USDC';
+    toast('✓ Connected to Arc Testnet');
+    await refresh();
+  } else {
+    account=null; $('#balChip').style.display='none'; $('#confessBtn').disabled=true;
+    $('#shareSub').textContent='Connect your wallet to post — 0.2 USDC';
+  }
+});
+
+/* ── READ / REFRESH (reads through the wallet provider) ── */
+async function refresh(){
+  try{
+    const [countBn, poolBn, tusBn] = await Promise.all([
+      confessFiRead.confessionCount(), confessFiRead.prizePool(), confessFiRead.timeUntilSettlement()
+    ]);
+    $('#poolVal').textContent = Number(formatUnits(poolBn,18)).toFixed(2);
+    countdownSeconds = Number(tusBn);
+    const total = Number(countBn);
+    if(total>0){
+      const page = await confessFiRead.getConfessionsPaginated(0, total);
+      confessions = page.map(c=>({
+        id:c.id, creator:c.creator, text:c.text, category:Number(c.category),
+        createdAt:c.createdAt, commentCount:Number(c.commentCount),
+        upvotes:Number(c.upvotes), downvotes:Number(c.downvotes),
+        realVotes:Number(c.realVotes), fakeVotes:Number(c.fakeVotes), hidden:c.hidden
+      })).reverse();
+    } else confessions=[];
+    try{ const o = await confessFiRead.owner(); isAdmin = !!account && o.toLowerCase()===account.toLowerCase(); }
+    catch(e){ isAdmin=false; }
+    $('#adminBadge').style.display = isAdmin ? 'inline-block' : 'none';
+    renderFeed(); renderSidebars(); updateTicker();
+    if(account){
+      const bal = await provider.getBalance(account); // native USDC = the only balance
+      $('#usdcBal').textContent = Number(formatUnits(bal,18)).toFixed(2)+' USDC';
+      $('#gasWarn').style.display = bal>0n ? 'none' : 'block';
+    }
+  }catch(e){ console.error(e); toast('Could not load data: '+((e.message||'').slice(0,50))); }
+}
+
+/* ── RENDER ── */
+function renderFeed(){
+  const feed=$('#feed'); feed.innerHTML='';
+  if(!account){ feed.innerHTML='<div class="empty">Connect your wallet to load confessions.</div>'; return; }
+  let list = activeFilter==='All' ? confessions : confessions.filter(c=>c.category===CATEGORIES.indexOf(activeFilter));
+  if(!isAdmin) list = list.filter(c=>!c.hidden); // hidden confessions only visible to admin
+  list = list.slice();
+  if(sortMode==='top') list.sort((a,b)=>score(b)-score(a) || Number(b.createdAt)-Number(a.createdAt));
+  else list.sort((a,b)=>Number(b.createdAt)-Number(a.createdAt));
+  if(list.length===0){ feed.innerHTML='<div class="empty">No confessions yet. Be the first to share a secret.</div>'; return; }
+  list.forEach(c=>feed.appendChild(renderCard(c)));
+}
+function renderCard(c){
+  const id=c.id.toString();
+  const totalFact=c.realVotes+c.fakeVotes;
+  const realPct = totalFact===0 ? 50 : Math.round(c.realVotes/totalFact*100);
+  const el=document.createElement('div'); el.className='card'; el.id='conf-'+id;
+  el.innerHTML=`
+    <div class="top">
+      <div><span class="mono">${mask(c.creator)}</span><span class="pill">${CATEGORIES[c.category]||'Unknown'}</span></div>
+      <span class="time">${fmtTime(c.createdAt)}</span>
+    </div>
+    <div class="body"></div>
+    <div class="barwrap">
+      <div class="barlabels"><span style="color:var(--green)">Real ${realPct}%</span><span style="color:var(--red)">Fake ${100-realPct}%</span></div>
+      <div class="bar"><div style="width:${realPct}%"></div></div>
+      <div class="factbtns">
+        <button class="vreal" data-act="real">Vote Real (0.1)</button>
+        <button class="vfake" data-act="fake">Vote Fake (0.1)</button>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="up" data-act="up">▲ ${c.upvotes} <span style="color:#666;font-size:10px">Upvote</span></button>
+      <button class="down" data-act="down">▼ ${c.downvotes} <span style="color:#666;font-size:10px">Downvote</span></button>
+      <button class="cm" data-act="toggle">💬 ${c.commentCount} <span style="color:#666;font-size:10px">Comment</span></button>
+      <span class="score">Score: ${score(c)}</span>
+    </div>
+    ${isAdmin ? `<div style="margin-top:10px;border-top:1px dashed rgba(248,113,113,.3);padding-top:10px;display:flex;align-items:center;gap:10px">
+      <button class="adminbtn" data-act="mod">${c.hidden?'Unhide':'Hide (admin)'}</button>
+      ${c.hidden?'<span style="color:#f87171;font-size:11px">HIDDEN from public</span>':''}
+    </div>`:''}
+    <div class="cmbox" style="display:${openComments[id]?'block':'none'}">
+      <div style="display:flex;gap:8px">
+        <input data-cm="input" maxlength="500" placeholder="Add a comment (0.05 USDC)" />
+        <button class="btn btn-purple" data-act="comment" style="padding:9px 14px;font-size:13px">Post</button>
+      </div>
+      <div data-cm="list"></div>
+    </div>`;
+  el.querySelector('.body').textContent=c.text;
+  el.querySelector('[data-act="up"]').onclick=()=>doAction('upvote',[c.id],FEES.vote,'Upvoted');
+  el.querySelector('[data-act="down"]').onclick=()=>doAction('downvote',[c.id],FEES.vote,'Downvoted');
+  el.querySelector('[data-act="real"]').onclick=()=>doAction('factCheck',[c.id,true],FEES.fact,'Voted Real');
+  el.querySelector('[data-act="fake"]').onclick=()=>doAction('factCheck',[c.id,false],FEES.fact,'Voted Fake');
+  el.querySelector('[data-act="toggle"]').onclick=()=>{ openComments[id]=!openComments[id]; renderFeed(); };
+  el.querySelector('[data-act="comment"]').onclick=()=>{
+    const v=el.querySelector('[data-cm="input"]').value.trim(); if(!v){toast('Enter a comment.');return;}
+    doAction('comment',[c.id,v],FEES.comment,'Comment posted');
+  };
+  if(c.hidden) el.style.opacity='0.55';
+  if(isAdmin){ const mb=el.querySelector('[data-act="mod"]'); if(mb) mb.onclick=()=>modConfession(c.id); }
+  if(openComments[id]) loadComments(c.id, el);
+  return el;
+}
+async function loadComments(id, el){
+  try{
+    const list = await confessFiRead.getComments(id);
+    const box = el.querySelector('[data-cm="list"]');
+    box.innerHTML = list.length? '' : '<div style="color:#666;font-size:11px;margin-top:8px">No comments yet.</div>';
+    list.forEach(cm=>{
+      const d=document.createElement('div'); d.className='cmitem';
+      d.innerHTML=`<div style="display:flex;justify-content:space-between"><span class="mono">${mask(cm.author)}</span><span class="time">${fmtTime(cm.createdAt)}</span></div>`;
+      const p=document.createElement('div'); p.style.marginTop='4px'; p.textContent=cm.text; d.appendChild(p);
+      box.appendChild(d);
+    });
+  }catch(e){}
+}
+function updateTicker(){
+  const t=$('#ticker'), track=$('#tickerTrack');
+  if(!confessions.length){ t.style.display='none'; return; }
+  const items = confessions.filter(c=>!c.hidden).slice(0,20).map(c=>
+    `<span class="ticker-item" data-id="${c.id}"><b>${CATEGORIES[c.category]||''}</b> ${escapeHtml(c.text.slice(0,90))} <span class="ta">${mask(c.creator)}</span></span>`
+  ).join('');
+  track.innerHTML = items + items; // duplicated for a seamless loop
+  t.style.display='block';
+}
+function renderSidebars(){
+  const lead=confessions.filter(c=>!c.hidden && score(c)>0).sort((a,b)=>score(b)-score(a)).slice(0,3);
+  const lb=$('#leaderboard');
+  if(lead.length===0) lb.innerHTML='<li style="background:none;color:var(--muted);font-size:12px">No ranked confessions yet.</li>';
+  else{ lb.innerHTML=''; const colors=['#facc15','#d1d5db','#d97706']; lead.forEach((c,i)=>{
+    const li=document.createElement('li');
+    li.innerHTML=`<span class="rank" style="color:${colors[i]}">#${i+1}</span><div style="min-width:0"><div class="truncate" style="font-size:12px">${escapeHtml(c.text)}</div><div style="font-size:11px;color:var(--green);margin-top:4px">Score: ${score(c)}</div></div>`;
+    lb.appendChild(li); }); }
+  const deb=confessions.filter(c=>!c.hidden && c.fakeVotes>c.realVotes).sort((a,b)=>b.fakeVotes-a.fakeVotes).slice(0,5);
+  const db=$('#debunked');
+  if(deb.length===0) db.innerHTML='<li style="background:none;color:var(--muted)">Nothing debunked yet.</li>';
+  else{ db.innerHTML=''; deb.forEach(c=>{
+    const li=document.createElement('li');
+    li.innerHTML=`<div class="truncate">${escapeHtml(c.text)}</div><div style="font-size:11px;color:#ef4444;margin-top:4px">Fake: ${c.fakeVotes} / Real: ${c.realVotes}</div>`;
+    db.appendChild(li); }); }
+}
+
+/* ── ACTIONS (single tx, fee sent as native USDC via value — NO approve) ── */
+async function doAction(method, args, fee, okMsg){
+  if(!account){ toast('Connect your wallet first.'); return; }
+  if(busy){ toast('Please wait for the current transaction.'); return; }
+  busy=true;
+  try{
+    toast('⏳ Sending transaction...');
+    const tx = await confessFiWrite[method](...args, { value: fee });
+    await tx.wait();
+    toast('✓ '+okMsg+'!');
+    await refresh();
+  }catch(e){ toast(friendlyError(e)); }
+  finally{ busy=false; }
+}
+/* Admin-only: hide/unhide a confession (onlyOwner on the contract). */
+async function modConfession(id){
+  if(!isAdmin){ toast('Admin only.'); return; }
+  if(busy){ toast('Please wait...'); return; }
+  busy=true;
+  try{
+    toast('⏳ Updating visibility...');
+    const tx = await confessFiWrite.toggleConfessionVisibility(id);
+    await tx.wait();
+    toast('✓ Updated');
+    await refresh();
+  }catch(e){ toast(friendlyError(e)); }
+  finally{ busy=false; }
+}
+$('#confessBtn').onclick = async ()=>{
+  const text=$('#confText').value.trim();
+  if(!text){ toast('Write something first.'); return; }
+  if(busy){ toast('Please wait...'); return; }
+  busy=true; const btn=$('#confessBtn'); btn.disabled=true; const old=btn.textContent;
+  try{
+    btn.textContent='Posting...'; toast('⏳ Posting confession...');
+    const tx = await confessFiWrite.createConfession(text, Number($('#confCat').value), { value: FEES.create });
+    await tx.wait();
+    $('#confText').value=''; toast('✓ Confession posted!');
+    await refresh();
+  }catch(e){ toast(friendlyError(e)); }
+  finally{ busy=false; btn.disabled=false; btn.textContent=old; }
+};
+function friendlyError(e){
+  const m=(e.shortMessage||e.reason||e.message||'').toString();
+  if(m.includes('rejected')||e.code===4001||e.code==='ACTION_REJECTED') return 'Transaction rejected.';
+  if(m.includes('AlreadyUpvoted')) return 'You already upvoted this.';
+  if(m.includes('AlreadyDownvoted')) return 'You already downvoted this.';
+  if(m.includes('AlreadyFactChecked')) return 'You already fact-checked this.';
+  if(m.includes('CommentLimitReached')) return 'Comment limit reached (3 per wallet).';
+  if(m.includes('insufficient')) return 'Insufficient USDC balance.';
+  return 'Failed: '+m.slice(0,70);
+}
+</script>
+</body>
+</html>
