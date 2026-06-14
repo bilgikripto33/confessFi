@@ -5,7 +5,7 @@ Testnet** (Chain ID `5042002`). Your wallet is your identity — no usernames, n
 sign-up, no backend, no database. Every confession, vote, comment and fact-check is a
 transaction, and every fee flows through an on-chain revenue-split engine.
 
-- **Live app:** _add your Vercel link here_
+- - **Live app:** https://confess-fi.vercel.app/
 - **Contract (Arc Testnet):** [`0x1d891C7ce9428171016Ed8a203E82E7BECEA53e6`](https://testnet.arcscan.app/address/0x1d891C7ce9428171016Ed8a203E82E7BECEA53e6)
 - **Chain ID:** `5042002` · **Explorer:** https://testnet.arcscan.app
 
